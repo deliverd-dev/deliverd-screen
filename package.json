@@ -1,0 +1,14 @@
+{
+  "name": "deliverd-screen-hook",
+  "private": true,
+  "version": "0.2.0",
+  "description": "The pre-commit hook for Deliverd Screen. The library itself is @deliverd/screen on npm.",
+  "type": "module",
+  "bin": {
+    "deliverd-screen-hook": "hook.mjs"
+  },
+  "dependencies": {
+    "@deliverd/screen": "^0.2.0"
+  },
+  "license": "MIT"
+}

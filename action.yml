@@ -1,0 +1,41 @@
+name: Deliverd Screen
+description: Fail the job when prompts, fixtures or eval sets contain personal data, secrets or your own confidential terms. Runs locally; nothing is sent anywhere.
+author: Deliverd
+branding:
+  icon: shield
+  color: blue
+inputs:
+  paths:
+    description: Files or globs to check, separated by spaces or new lines (for example "prompts/**/*.txt evals/*.jsonl").
+    required: true
+  terms:
+    description: Optional file of your own words not to send, one per line (client names, project code names).
+    required: false
+    default: ""
+  version:
+    description: The @deliverd/screen version to run.
+    required: false
+    default: "0.2"
+runs:
+  using: composite
+  steps:
+    - name: Check the files
+      shell: bash
+      env:
+        SCREEN_PATHS: ${{ inputs.paths }}
+        SCREEN_TERMS: ${{ inputs.terms }}
+        SCREEN_VERSION: ${{ inputs.version }}
+      run: |
+        shopt -s globstar nullglob
+        files=()
+        for pattern in $SCREEN_PATHS; do
+          matched=($pattern)
+          files+=("${matched[@]}")
+        done
+        if [ ${#files[@]} -eq 0 ]; then
+          echo "::warning::Deliverd Screen: no files matched: $SCREEN_PATHS"
+          exit 0
+        fi
+        args=(--fail)
+        if [ -n "$SCREEN_TERMS" ]; then args+=(--terms "$SCREEN_TERMS"); fi
+        npx -y "@deliverd/screen@$SCREEN_VERSION" "${args[@]}" "${files[@]}"

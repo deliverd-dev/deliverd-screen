@@ -1,0 +1,46 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean files pass
+        uses: ./
+        with:
+          paths: examples/clean/*.txt
+      - name: A file with an email address fails
+        id: dirty
+        continue-on-error: true
+        uses: ./
+        with:
+          paths: examples/dirty/*.txt
+      - name: Check that it failed
+        if: steps.dirty.outcome != 'failure'
+        run: |
+          echo "The action passed a file with personal data in it."
+          exit 1
+
+  hook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: node hook.mjs --fail examples/clean/*.txt
+      - name: The hook fails on personal data
+        run: |
+          if node hook.mjs --fail examples/dirty/*.txt; then
+            echo "The hook passed a file with personal data in it."
+            exit 1
+          fi

@@ -1,0 +1,6 @@
+- id: deliverd-screen
+  name: Deliverd Screen
+  description: Find personal data, secrets and your own confidential terms in files before they are committed. Point it at prompts, fixtures and eval sets with `files:`.
+  entry: deliverd-screen-hook --fail
+  language: node
+  types: [text]
