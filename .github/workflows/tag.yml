@@ -1,0 +1,33 @@
+name: tag
+
+# Tags a release of the Action and the hook: vX.Y.Z, and moves the major
+# tag (v0) that `uses: deliverd-dev/deliverd-screen@v0` follows.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to tag, such as 0.2.0 (match @deliverd/screen)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          case "$VERSION" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "Not a version: $VERSION"; exit 1 ;;
+          esac
+          grep -q "\"version\": \"$VERSION\"" package.json || { echo "package.json is not at $VERSION"; exit 1; }
+          major="v${VERSION%%.*}"
+          git tag "v$VERSION"
+          git tag -f "$major"
+          git push origin "v$VERSION"
+          git push -f origin "$major"
